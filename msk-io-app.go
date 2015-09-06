@@ -23,7 +23,46 @@ func main() {
 	assets := http.FileServer(http.Dir("assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", assets))
 
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":3000", newSecureHost(http.DefaultServeMux))
+}
+
+type secureHost struct {
+	handler http.Handler
+}
+
+func newSecureHost(handler http.Handler) *secureHost {
+	return &secureHost{handler: handler}
+}
+
+func (s *secureHost) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var redirect bool = false
+	if !isHTTPS(r) {
+		switch r.Host {
+		case "msk.io":
+			redirect = true
+		case "www.msk.io":
+			redirect = true
+		}
+	}
+	if redirect {
+		dest := "https://" + r.Host + r.URL.Path
+		http.Redirect(w, r, dest, 301)
+	} else {
+		s.handler.ServeHTTP(w, r)
+	}
+}
+
+func isHTTPS(r *http.Request) bool {
+	if r.URL.Scheme == "https" {
+		return true
+	}
+	if strings.HasPrefix(r.Proto, "HTTPS") {
+		return true
+	}
+	if r.Header.Get("X-Forwarded-Proto") == "https" {
+		return true
+	}
+	return false
 }
 
 func loggingHandler(h http.Handler) http.Handler {
