@@ -35,17 +35,17 @@ func newSecureHost(handler http.Handler) *secureHost {
 }
 
 func (s *secureHost) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var redirect bool = false
+	var dest string
 	if !isHTTPS(r) {
 		switch r.Host {
 		case "msk.io":
-			redirect = true
+		case "msk.io:80":
 		case "www.msk.io":
-			redirect = true
+		case "www.msk.io:80":
+			dest = "https://msk.io" + r.URL.Path
 		}
 	}
-	if redirect {
-		dest := "https://" + r.Host + r.URL.Path
+	if len(dest) > 0 {
 		http.Redirect(w, r, dest, 301)
 	} else {
 		s.handler.ServeHTTP(w, r)
