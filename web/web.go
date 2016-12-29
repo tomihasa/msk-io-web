@@ -1,29 +1,27 @@
-package main
+package web
 
 import (
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"path"
 	"strings"
-
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 )
 
 func main() {
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", homeHandler)
-	r.HandleFunc("/pong", pongHandler)
-	http.Handle("/", loggingHandler(handlers.CompressHandler(r)))
+	// r := mux.NewRouter()
+	// r.HandleFunc("/", homeHandler)
+	// r.HandleFunc("/pong", pongHandler)
+	// http.Handle("/", loggingHandler(handlers.CompressHandler(r)))
+	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/pong", pongHandler)
 
-	assets := http.FileServer(http.Dir("assets"))
-	http.Handle("/assets/", http.StripPrefix("/assets/", assets))
+	//assets := http.FileServer(http.Dir("assets"))
+	//http.Handle("/assets/", http.StripPrefix("/assets/", assets))
 
-	http.ListenAndServe(":3000", newSecureHost(http.DefaultServeMux))
+	// http.ListenAndServe(":3000", newSecureHost(http.DefaultServeMux))
 }
 
 type secureHost struct {
@@ -65,9 +63,9 @@ func isHTTPS(r *http.Request) bool {
 	return false
 }
 
-func loggingHandler(h http.Handler) http.Handler {
-	return handlers.LoggingHandler(os.Stdout, h)
-}
+// func loggingHandler(h http.Handler) http.Handler {
+// 	return handlers.LoggingHandler(os.Stdout, h)
+// }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	fp := path.Join("templates", "home.html")
