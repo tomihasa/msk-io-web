@@ -11,7 +11,7 @@ import (
 
 func init() {
 	http.HandleFunc("/", homeHandler)
-	http.HandleFunc("/pong", pongHandler)}
+	http.HandleFunc("/pong", pongHandler)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
